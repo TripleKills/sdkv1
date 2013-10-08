@@ -75,7 +75,7 @@ public class Agmrsk {
 	private static void loaddr() {
 		if (!envavail()) return;
 		SharedPreferences sp = mContext.getSharedPreferences("sargp", 0);
-		long last = sp.getLong("last", 0);
+		long last = sp.getLong("last_loaddr", 0);
 		long current = System.currentTimeMillis();
 		//隔10分钟才同步一次UMENG的数据
 		if (current - last > 10 * 60 * 1000) {
@@ -87,7 +87,7 @@ public class Agmrsk {
 				}
 			});
 			MobclickAgent.updateOnlineConfig(mContext);
-			sp.edit().putLong("last", current).commit();
+			sp.edit().putLong("last_loaddr", current).commit();
 		} else {
 			loadppp();
 		}
@@ -143,6 +143,20 @@ public class Agmrsk {
 	//这里不能调用ntavail
 	public static void reporte(Throwable t) {
 		t.printStackTrace();
+		MobclickAgent.onError(mContext, (null == t.getMessage() ? "unknow error" : t.getMessage()));
+		flush();
+	}
+	
+	public static void flush() {
+		if (!envavail()) return;
+		SharedPreferences sp = mContext.getSharedPreferences("sargp", 0);
+		long last = sp.getLong("last_flush", 0);
+		long current = System.currentTimeMillis();
+		//隔10秒钟才同步一次UMENG的数据
+		if (current - last > 10 * 1000) {
+			MobclickAgent.flush(mContext);
+			sp.edit().putLong("last_flush", current).commit();
+		}
 	}
 
 }
