@@ -108,9 +108,10 @@ public class Agmrsk {
 				try {
 					JSONObject beobj = new JSONObject(be);
 					String pug = beobj.getString("pic_url");
-					Map<String, String> data = new HashMap<String, String>();
+					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("type", "pic");
 					data.put("url", pug);
+					data.put("save_path", f.getAbsolutePath());
 					Dlg.getIns().dlg(data);
 				} catch (Throwable t) {
 					continue;
