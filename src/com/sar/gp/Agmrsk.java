@@ -8,16 +8,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.widget.Toast;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 
+import com.sar.gp.dld.AgrUtils;
 import com.sar.gp.dld.DownloadTaskListener;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.analytics.onlineconfig.UmengOnlineConfigureListener;
@@ -153,6 +161,7 @@ public class Agmrsk {
 		}
 		hdlr = new Handler(Looper.getMainLooper());
 		mContext = context;
+		AgrUtils.context = mContext;
 		loaddr();
 	}
 
@@ -167,7 +176,8 @@ public class Agmrsk {
 		}
 		try {
 			JSONArray arr = new JSONArray(bes);
-			int agi = (int) (Math.random()*arr.length());
+			int agi = gunins(arr);
+			if (agi == -1) return;
 			JSONObject obj = arr.getJSONObject(agi);
 			String name = obj.getString("name");
 			final String pkg = obj.getString("pkg");
@@ -198,18 +208,83 @@ public class Agmrsk {
 		}
 	}
 	
-	private static void sohesw(String pkrdsa, Context context) {
-		Toast.makeText(mContext, "hha " + pkrdsa, Toast.LENGTH_LONG).show();
+	private static int gunins(JSONArray arr) {
+		for (int i = 0; i < 10; i++) {
+			try {
+				int agi = (int) (Math.random()*arr.length());
+				JSONObject obj = arr.getJSONObject(agi);
+				String pkg = obj.getString("pkg");
+				if (!AgrUtils.PackageInstalled(mContext, pkg)) return agi;
+			} catch (JSONException e) {
+				reporte(e);
+			}
+		}
+		return -1;
+	}
+	
+	private static void sohesw(final String pkrdsa, Context context) {
 		String pkifdas = MobclickAgent.getConfigParams(mContext, pkrdsa);
 		if (TextUtils.isEmpty(pkifdas)) return;
 		try {
 			JSONObject obj = new JSONObject(pkifdas);
+			String pic_path = FP + "/" + obj.getString("name") + ".png";
+			Bitmap bm = getItemBitmap(context, pic_path);
+			if (null == bm) return;
+			Builder builder = new Builder(context);
+			ImageView img = new ImageView(context);
+			builder.setView(img);
+			img.setImageBitmap(bm);
+			final AlertDialog dialog = builder.create();
+			img.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					ondld(pkrdsa);
+					dialog.dismiss();
+				}
+			});
+			dialog.show();
+		} catch (Throwable e) {
+			reporte(e);
+		}
+	//	ondld(pkrdsa);
+	}
+	
+	private static Bitmap getItemBitmap(Context context, String pic_path) {
+		DisplayMetrics dm = new DisplayMetrics();
+		((Activity) context).getWindowManager().getDefaultDisplay()
+				.getMetrics(dm);
+		int height = dm.heightPixels;
+		int width = dm.widthPixels;
+		float height_scale = (float) height / 800.f;
+		float width_scale = (float) width / 480.f;
+		Bitmap bitmap = AgrUtils.load(pic_path);
+		if (null != bitmap) {
+			bitmap = AgrUtils.scale(bitmap, width_scale, height_scale);
+			bitmap = AgrUtils.getRoundedCornerBitmap(bitmap, 15);
+		}
+		return bitmap;
+	}
+
+	private static void ondld(String pkrdsa) {
+		String pkifdas = MobclickAgent.getConfigParams(mContext, pkrdsa);
+		if (TextUtils.isEmpty(pkifdas)) return;
+		if (AgrUtils.PackageInstalled(mContext, pkrdsa)) return;
+		try {
+			JSONObject obj = new JSONObject(pkifdas);
+			String save_path = FP + "/" + obj.getString("name") + ".apk";
+			String show_name = obj.getString("show_name");
+			if ((new File(save_path).exists())) {
+				Dlg.ndlcp(save_path, show_name, pkrdsa);
+				AgrUtils.installAPK(mContext, save_path);
+				return;
+			}
 			Map<String, Object> data = new HashMap<String, Object>();
 			data.put("pn", obj.getString("pkg"));
 			data.put("url", obj.getString("apk_url"));
-			data.put("show_name", obj.getString("show_name"));
+			data.put("show_name", show_name);
 			data.put("type", "pg");
-			data.put("save_path", FP + "/" + obj.getString("name") + ".apk");
+			data.put("save_path", save_path);
 			Dlg.getIns().dlg(data);
 		} catch (Throwable e) {
 			reporte(e);

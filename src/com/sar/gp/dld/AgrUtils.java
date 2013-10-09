@@ -467,6 +467,11 @@ public class AgrUtils {
 		}
 		return false;
 	}
+	
+	public static void delf(String path) {
+		File f = new File(path);
+		if (f.exists()) f.delete();
+	}
 
 	public static boolean delete(File path) {
 		boolean result = true;

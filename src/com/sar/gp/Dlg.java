@@ -185,7 +185,7 @@ public class Dlg {
 	 * @param pn
 	 *            包名
 	 */
-	private static void ndlcp(String pt, String apn, String pn) {
+	public static void ndlcp(String pt, String apn, String pn) {
 		String msg = apn + "下载完成";
 		Intent intent = new Intent();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
