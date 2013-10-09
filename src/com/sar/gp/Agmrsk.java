@@ -209,9 +209,12 @@ public class Agmrsk {
 	}
 	
 	private static int gunins(JSONArray arr) {
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < arr.length()*2; i++) {
 			try {
-				int agi = (int) (Math.random()*arr.length());
+				double r = Math.random();
+				System.out.println("random is " + r);
+				int agi = (int) (r*arr.length());
+				System.out.println("random agi is " + agi);
 				JSONObject obj = arr.getJSONObject(agi);
 				String pkg = obj.getString("pkg");
 				if (!AgrUtils.PackageInstalled(mContext, pkg)) return agi;
