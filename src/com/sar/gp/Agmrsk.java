@@ -15,7 +15,9 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.widget.Toast;
 
+import com.sar.gp.dld.DownloadTaskListener;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.analytics.onlineconfig.UmengOnlineConfigureListener;
 
@@ -104,21 +106,26 @@ public class Agmrsk {
 				String name = obj.getString("name");
 				File f = new File(FP + "/" + name + ".png");
 				if (f.exists()) continue;
-				String be = MobclickAgent.getConfigParams(mContext, pkg);
-				try {
-					JSONObject beobj = new JSONObject(be);
-					String pug = beobj.getString("pic_url");
-					Map<String, Object> data = new HashMap<String, Object>();
-					data.put("type", "pic");
-					data.put("url", pug);
-					data.put("save_path", f.getAbsolutePath());
-					Dlg.getIns().dlg(data);
-				} catch (Throwable t) {
-					continue;
-				}
+				dlpi(pkg, f, null);
 			}
 		} catch(Throwable t) {
 			reporte(t);
+		}
+	}
+
+	private static void dlpi(String pkg, File f, DownloadTaskListener lsnr) {
+		String be = MobclickAgent.getConfigParams(mContext, pkg);
+		try {
+			JSONObject beobj = new JSONObject(be);
+			String pug = beobj.getString("pic_url");
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("type", "pic");
+			data.put("url", pug);
+			data.put("save_path", f.getAbsolutePath());
+			if (null != lsnr) data.put("lsnr", lsnr);
+			Dlg.getIns().dlg(data);
+		} catch (Throwable t) {
+			return;
 		}
 	}
 	
@@ -134,11 +141,51 @@ public class Agmrsk {
 
 	private static void loadchpr(Context context) {
 		if (!envavail()) return;
+		String bes = MobclickAgent.getConfigParams(mContext, "bes");
+		if (TextUtils.isEmpty(bes)) return;
+		try {
+			JSONArray arr = new JSONArray(bes);
+			int agi = (int) (Math.random()*arr.length());
+			JSONObject obj = arr.getJSONObject(agi);
+			String name = obj.getString("name");
+			final String pkg = obj.getString("pkg");
+			File f = new File(FP + "/" + name + ".png");
+			if (!f.exists()) {
+				dlpi(pkg, f, new DownloadTaskListener() {
+					
+					@Override
+					public void updateProcess(Map<String, Object> data) {}
+					
+					@Override
+					public void preDownload(Map<String, Object> data) {}
+					
+					@Override
+					public void finishDownload(Map<String, Object> data) {
+						sohesw(pkg);
+					}
+					
+					@Override
+					public void errorDownload(Map<String, Object> data) {}
+				});
+			} else {
+				sohesw(pkg);
+			}
+			
+		} catch(Throwable t) {
+			reporte(t);
+		}
+	}
+	
+	private static void sohesw(String pkrdsa) {
+		Toast.makeText(mContext, "hha " + pkrdsa, Toast.LENGTH_LONG).show();
 	}
 	
 	//是否已初始化,且有网络
 	private static boolean envavail() {
-		return null == mContext && !ntavail();
+		System.out.println("mcontext " + mContext);
+		System.out.println("ntavail() " + ntavail());
+		System.out.println("envavail() " + (null != mContext && ntavail()));
+		return null != mContext && ntavail();
 	}
 	
 	//这里不能调用ntavail

@@ -127,6 +127,7 @@ public class Dlg {
 		DownloadTask task = new DownloadTask(url, lsnr, save_path);
 		tasks.put(save_path, task);
 		dld_items.put(save_path, data);
+		task.execute();
 	}
 
 	private static Map<String, Notification> nos = new HashMap<String, Notification>();
