@@ -37,6 +37,7 @@ public class DownloadTask extends AsyncTask<Void, Integer, Long> {
 	private long downloadPercent;
 	private Throwable error = null;
 	private boolean interrupt = false;
+	private long last_flush = 0;
 
 	private final class ProgressReportingRandomAccessFile extends
 			RandomAccessFile {
@@ -113,8 +114,12 @@ public class DownloadTask extends AsyncTask<Void, Integer, Long> {
 			downloadSize = progress[0];
 			downloadPercent = (downloadSize + previousFileSize) * 100
 					/ totalSize;
-			if (listener != null)
+			if (downloadPercent-last_flush > 5)
+				System.out.println("download percent: " + downloadPercent);
+			if (listener != null && downloadPercent-last_flush > 5) {
 				listener.updateProcess(getData());
+				last_flush = downloadPercent;
+			}
 		}
 	}
 

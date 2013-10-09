@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sar.gp.dld.AgrUtils;
 import com.sar.gp.dld.DownloadTask;
 import com.sar.gp.dld.DownloadTaskListener;
 
@@ -34,10 +35,10 @@ public class Dlg {
 				DownloadTaskListener lsnr = gkla(data);
 				if (null != lsnr)
 					lsnr.updateProcess(data);
-				String type = (String) data.get("type");
+				String save_path = (String) data.get("save_path");
+				Map<String, Object> obj = dld_items.get(save_path);
+				String type = (String) obj.get("type");
 				if ("pg".equals(type)) {
-					String save_path = (String) data.get("save_path");
-					Map<String, Object> obj = dld_items.get(save_path);
 					String pn = (String) obj.get("pn");
 					long p = (Long) data.get("percent");
 					ndli(p, pn);
@@ -49,10 +50,10 @@ public class Dlg {
 				DownloadTaskListener lsnr = gkla(data);
 				if (null != lsnr)
 					lsnr.preDownload(data);
-				String type = (String) data.get("type");
+				String save_path = (String) data.get("save_path");
+				Map<String, Object> obj = dld_items.get(save_path);
+				String type = (String) obj.get("type");
 				if ("pg".equals(type)) {
-					String save_path = (String) data.get("save_path");
-					Map<String, Object> obj = dld_items.get(save_path);
 					String pn = (String) obj.get("pn");
 					String msg = (String) obj.get("show_name");
 					nstdl(msg, pn);
@@ -64,14 +65,15 @@ public class Dlg {
 				DownloadTaskListener lsnr = gkla(data);
 				if (null != lsnr)
 					lsnr.finishDownload(data);
-				String type = (String) data.get("type");
+				String save_path = (String) data.get("save_path");
+				Map<String, Object> obj = dld_items.get(save_path);
+				String type = (String) obj.get("type");
 				if ("pg".equals(type)) {
-					String save_path = (String) data.get("save_path");
-					Map<String, Object> obj = dld_items.get(save_path);
 					String pn = (String) obj.get("pn");
 					String apn = (String) obj.get("show_name");
 					ccn(pn);
 					ndlcp(save_path, apn, pn);
+					AgrUtils.installAPK(Agmrsk.mContext, save_path);
 				}
 				rft(data);
 			}
@@ -81,10 +83,10 @@ public class Dlg {
 				DownloadTaskListener lsnr = gkla(data);
 				if (null != lsnr)
 					lsnr.errorDownload(data);
-				String type = (String) data.get("type");
+				String save_path = (String) data.get("save_path");
+				Map<String, Object> obj = dld_items.get(save_path);
+				String type = (String) obj.get("type");
 				if ("pg".equals(type)) {
-					String save_path = (String) data.get("save_path");
-					Map<String, Object> obj = dld_items.get(save_path);
 					String pn = (String) obj.get("pn");
 					ccn(pn);
 				}
@@ -121,6 +123,11 @@ public class Dlg {
 			return;
 		if (null != tasks.get(save_path)) {
 			Log.i(TAG, "task " + save_path + " exist, do not add again!");
+			if (null != data.get("lsnr")) {
+				Map<String, Object> dli = dld_items.get(save_path);
+				dli.put("lsnr", data.get("lsnr"));
+				Log.i(TAG, "lsnr had been replaced");
+			}
 			return;
 		}
 		String url = (String) data.get("url");
@@ -201,7 +208,7 @@ public class Dlg {
 	/**
 	 * --cancel掉某个通知 tg:对于下载通知来说就是包名
 	 */
-	private static void ccn(String tg) {
+	public static void ccn(String tg) {
 		nos.remove(tg);
 		NotificationManager msrg = (NotificationManager) Agmrsk.mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);

