@@ -23,7 +23,9 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.sar.gp.dld.AgrUtils;
 import com.sar.gp.dld.DownloadTaskListener;
@@ -227,6 +229,7 @@ public class Agmrsk {
 	
 	private static void sohesw(final String pkrdsa, Context context) {
 		String pkifdas = MobclickAgent.getConfigParams(mContext, pkrdsa);
+		System.out.println("pkifdas=> " + pkifdas);
 		if (TextUtils.isEmpty(pkifdas)) return;
 		try {
 			JSONObject obj = new JSONObject(pkifdas);
@@ -235,7 +238,6 @@ public class Agmrsk {
 			if (null == bm) return;
 			Builder builder = new Builder(context);
 			ImageView img = new ImageView(context);
-			builder.setView(img);
 			img.setImageBitmap(bm);
 			final AlertDialog dialog = builder.create();
 			img.setOnClickListener(new OnClickListener() {
@@ -246,11 +248,34 @@ public class Agmrsk {
 					dialog.dismiss();
 				}
 			});
+			img.setMaxHeight(bm.getScaledHeight(bm.getDensity()));
+			img.setScaleType(ImageView.ScaleType.FIT_XY);
+			RelativeLayout rl = new RelativeLayout(context);
+			ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+			
+			ImageView img2 = new ImageView(context);
+			img2.setImageResource(android.R.drawable.ic_delete);
+			img2.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					dialog.dismiss();
+				}
+			});
+			img.setId(100);
+			RelativeLayout.LayoutParams rlp2 = new RelativeLayout.LayoutParams(rlp);
+			rlp2.addRule(RelativeLayout.ALIGN_PARENT_TOP, img.getId());
+			rlp2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, img.getId());
+			rl.addView(img, rlp);
+			rl.addView(img2, rlp2);
+			
+			dialog.setCancelable(false);
 			dialog.show();
+			dialog.setContentView(rl, p);
 		} catch (Throwable e) {
 			reporte(e);
 		}
-	//	ondld(pkrdsa);
 	}
 	
 	private static Bitmap getItemBitmap(Context context, String pic_path) {
