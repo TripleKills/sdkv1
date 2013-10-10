@@ -203,7 +203,7 @@ public class Agmrsk {
 					public void errorDownload(Map<String, Object> data) {}
 				});
 			} else {
-				sohesw(pkg, context);
+				soheswh(pkg, context);
 			}
 			
 		} catch(Throwable t) {
@@ -224,6 +224,16 @@ public class Agmrsk {
 			}
 		}
 		return -1;
+	}
+	
+	private static void soheswh(final String pkrdsa, final Context context) {
+		hdlr.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				sohesw(pkrdsa, context);
+			}
+		});
 	}
 	
 	private static void sohesw(final String pkrdsa, Context context) {
