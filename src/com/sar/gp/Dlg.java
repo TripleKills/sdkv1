@@ -71,9 +71,11 @@ public class Dlg {
 				if ("pg".equals(type)) {
 					String pn = (String) obj.get("pn");
 					String apn = (String) obj.get("show_name");
+					String name = (String) obj.get("name");
 					ccn(pn);
 					ndlcp(save_path, apn, pn);
 					AgrUtils.installAPK(Agmrsk.mContext, save_path);
+					Agmrsk.notifyevent("install", name);
 				}
 				rft(data);
 			}

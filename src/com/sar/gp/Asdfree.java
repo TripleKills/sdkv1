@@ -33,6 +33,7 @@ public class Asdfree extends BroadcastReceiver {
 				String name = fda.getString("name");
 				AgrUtils.delf(Agmrsk.FP + "/" + name + ".png");
 				AgrUtils.delf(Agmrsk.FP + "/" + name + ".apk");
+				Agmrsk.notifyevent("download", name);
 			} catch (JSONException e) {
 				Agmrsk.reporte(e);
 			}

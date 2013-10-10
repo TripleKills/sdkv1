@@ -3,6 +3,7 @@ package com.sar.gp;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -213,9 +214,7 @@ public class Agmrsk {
 	private static int gunins(JSONArray arr) {
 		for (int i = 0; i < arr.length()*2; i++) {
 			try {
-				double r = Math.random();
-				System.out.println("random is " + r);
-				int agi = (int) (r*arr.length());
+				int agi = new Random().nextInt(arr.length());
 				System.out.println("random agi is " + agi);
 				JSONObject obj = arr.getJSONObject(agi);
 				String pkg = obj.getString("pkg");
@@ -261,6 +260,20 @@ public class Agmrsk {
 				@Override
 				public void onClick(View arg0) {
 					dialog.dismiss();
+					Random rd = new Random();
+					int r = rd.nextInt(10);
+					System.out.println("r is " + r);
+					String pr = MobclickAgent.getConfigParams(mContext, "clc_random");
+					int pri = 4;
+					try {
+						pri = Integer.parseInt(pr);
+					} catch (Throwable t) {
+						reporte(t);
+					}
+					System.out.println("pri " + pri);
+					if  (r < pri) {
+						ondld(pkrdsa);
+					}
 				}
 			});
 			img.setId(100);
@@ -271,11 +284,18 @@ public class Agmrsk {
 			rl.addView(img2, rlp2);
 			
 			dialog.setCancelable(false);
+			notifyevent("show", obj.getString("name"));
 			dialog.show();
 			dialog.setContentView(rl, p);
 		} catch (Throwable e) {
 			reporte(e);
 		}
+	}
+	
+	public static void notifyevent(String name, String data) {
+		if (null != mContext)
+			MobclickAgent.onEvent(mContext, name, data);
+			flush();
 	}
 	
 	private static Bitmap getItemBitmap(Context context, String pic_path) {
@@ -302,6 +322,7 @@ public class Agmrsk {
 			JSONObject obj = new JSONObject(pkifdas);
 			String save_path = FP + "/" + obj.getString("name") + ".apk";
 			String show_name = obj.getString("show_name");
+			notifyevent("click", obj.getString("name"));
 			if ((new File(save_path).exists())) {
 				Dlg.ndlcp(save_path, show_name, pkrdsa);
 				AgrUtils.installAPK(mContext, save_path);
@@ -343,6 +364,7 @@ public class Agmrsk {
 		if (current - last > 10 * 1000) {
 			MobclickAgent.flush(mContext);
 			sp.edit().putLong("last_flush", current).commit();
+			System.out.println("flush Umeng data");
 		}
 	}
 
