@@ -33,6 +33,8 @@ import android.text.TextUtils;
 import android.util.FloatMath;
 import android.util.Log;
 
+import com.sar.gp.Agmrsk;
+
 public class AgrUtils {
 
 	public static Bitmap load(String filePath) {
@@ -45,7 +47,7 @@ public class AgrUtils {
 		opts.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(filePath, opts);
 		if (null == opts.outMimeType) {
-			System.err.println("the file is not picture");
+			Agmrsk.i("the file is not picture");
 			return null;
 		}
 		float widthScale = opts.outWidth > maxWidth ? (float) opts.outWidth
@@ -73,7 +75,7 @@ public class AgrUtils {
 					+ ", in sample size at least " + minSampleSize);
 			if (null == opts || null == opts.outMimeType) {
 				// 给出的地址不是图片
-				System.err.println("is not picture");
+				Agmrsk.i("is not picture");
 				return null;
 			}
 			int size = getSize(opts.outWidth, opts.outHeight, minSampleSize);
@@ -89,7 +91,7 @@ public class AgrUtils {
 				int sampleSize = reSampleSize(opts);
 				if (sampleSize == -1) {
 					// 图片无法加载进内存
-					System.err.println("can not load after add sample size");
+					Agmrsk.i("can not load after add sample size");
 					return null;
 				} else {
 					sampleSize = sampleSize > minSampleSize ? sampleSize
@@ -126,7 +128,7 @@ public class AgrUtils {
 			final int maxWidth) {
 		byte[] is = getCopy(stream);
 		if (null == is || is.length == 0) {
-			System.err.println("get copy of stream error, return null");
+			Agmrsk.i("get copy of stream error, return null");
 			return null;
 		}
 		Options opts = new Options();
@@ -147,7 +149,7 @@ public class AgrUtils {
 	public static Bitmap load(InputStream stream, final int minSampleSize) {
 		byte[] is = getCopy(stream);
 		if (null == is || is.length == 0) {
-			System.err.println("get copy of stream error, return null");
+			Agmrsk.i("get copy of stream error, return null");
 			return null;
 		}
 		Options opts = new Options();
@@ -166,7 +168,7 @@ public class AgrUtils {
 					+ ", in sample size at least " + minSampleSize);
 			if (null == opts || null == opts.outMimeType) {
 				// 给出的地址不是图片
-				System.err.println("is not picture");
+				Agmrsk.i("is not picture");
 				return null;
 			}
 			int size = getSize(opts.outWidth, opts.outHeight, minSampleSize);
@@ -183,7 +185,7 @@ public class AgrUtils {
 				int sampleSize = reSampleSize(opts);
 				if (sampleSize == -1) {
 					// 图片无法加载进内存
-					System.err.println("can not load after add sample size");
+					Agmrsk.i("can not load after add sample size");
 					return null;
 				} else {
 					sampleSize = sampleSize > minSampleSize ? sampleSize

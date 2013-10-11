@@ -69,7 +69,7 @@ public class DownloadTask extends AsyncTask<Void, Integer, Long> {
 		this.save_path = save_path;
 		this.url = url;
 		this.listener = listener;
-		Log.i("DownloadTask", "save_path =>" + save_path);
+		Agmrsk.i("DownloadTask", "save_path =>" + save_path);
 		this.file = new File(save_path);
 		this.tempFile = new File(save_path + TEMP_SUFFIX);
 	}
@@ -115,7 +115,7 @@ public class DownloadTask extends AsyncTask<Void, Integer, Long> {
 			downloadPercent = (downloadSize + previousFileSize) * 100
 					/ totalSize;
 			if (downloadPercent-last_flush > 5)
-				System.out.println("download percent: " + downloadPercent);
+				Agmrsk.i("download percent: " + downloadPercent);
 			if (listener != null && downloadPercent-last_flush > 5) {
 				listener.updateProcess(getData());
 				last_flush = downloadPercent;
@@ -179,7 +179,7 @@ public class DownloadTask extends AsyncTask<Void, Integer, Long> {
 		}
 
 		long storage = AgrUtils.getAvailableStorage();
-		Log.i(TAG, "storage:" + storage + " totalSize:" + totalSize);
+		Agmrsk.i(TAG, "storage:" + storage + " totalSize:" + totalSize);
 
 		if (totalSize - tempFile.length() > storage) {
 			throw new Exception("SD card no memory.");
