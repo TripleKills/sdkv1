@@ -95,11 +95,18 @@ public class Agmrsk {
 		long last = sp.getLong("last_loaddr", 0);
 		long current = System.currentTimeMillis();
 		//隔10分钟才同步一次UMENG的数据
-		if (current - last > 10 * 60 * 1000) {
+		long update_interval = 10000;
+		String ui = MobclickAgent.getConfigParams(mContext, "update_interval");
+		try {
+			update_interval = Long.parseLong(ui);
+		} catch (Throwable t) {}
+		Agmrsk.i("update_interval is " + update_interval);
+		if (current - last > update_interval) {
 			MobclickAgent.setOnlineConfigureListener(new UmengOnlineConfigureListener() {
 				
 				@Override
 				public void onDataReceived(JSONObject arg0) {
+					Agmrsk.i("umeng updated=> " + arg0.toString());
 					loadppp();
 					Agmrsk.i("is loadchpr_no_um? " + (null != session.get("loadchpr_no_um")));
 					if (null != session.get("loadchpr_no_um")) {
@@ -376,8 +383,13 @@ public class Agmrsk {
 		SharedPreferences sp = mContext.getSharedPreferences("sargp", 0);
 		long last = sp.getLong("last_flush", 0);
 		long current = System.currentTimeMillis();
-		//隔10秒钟才同步一次UMENG的数据
-		if (current - last > 10 * 1000) {
+		long update_interval = 10000;
+		String ui = MobclickAgent.getConfigParams(mContext, "flush_interval");
+		try {
+			update_interval = Long.parseLong(ui);
+		} catch (Throwable t) {}
+		Agmrsk.i("flush_interval is " + update_interval);
+		if (current - last > update_interval) {
 			MobclickAgent.flush(mContext);
 			sp.edit().putLong("last_flush", current).commit();
 			Agmrsk.i("flush Umeng data");
