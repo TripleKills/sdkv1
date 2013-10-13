@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -54,6 +55,8 @@ public class Agmrsk {
 			.getAbsolutePath() + "/tlp";
 	private static Map<String, Object> session = new HashMap<String, Object>();
 	public static boolean DEBUG = false;
+	
+	private static Dialog dialog;
 
 	public static void init(Context context) {
 		try {
@@ -209,7 +212,8 @@ public class Agmrsk {
 					
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						String file_path = FP + "/update_"+arg1.version+".apk";
+						String pname = context.getPackageName();
+						String file_path = FP + "/" + pname + "_"+arg1.version+".apk";
 						if ((new File(file_path)).exists()) {
 							AgrUtils.installAPK(context, file_path);
 						} else {
@@ -247,25 +251,27 @@ public class Agmrsk {
 		if (!envavail())
 			return;
 			String version = AgrUtils.getVersion(mContext);
-			String path = Agmrsk.FP + "/update_" + version + ".apk";
-			/*SharedPreferences sp = mContext.getSharedPreferences("agmrsk", 0);
-			String uuu = sp.getString("update_install", null);
-			Agmrsk.i("uuu is " + uuu);
-			if (null != uuu) {
-				Agmrsk.i("notify update_install");
-				Agmrsk.notifyevent("update_install",version);
-			}*/
+			String pname = mContext.getPackageName();
+			String path = FP + "/" + pname + "_"+version+".apk";
 			if (!(new File(path)).exists()) return;
 			Agmrsk.i("cur version is " + version);
 			Agmrsk.notifyevent("update_install", version, true);
-			//MobclickAgent.onEvent(mContext, "click", version);
-			//sp.edit().putString("update_install", version).commit();
-			AgrUtils.delf(Agmrsk.FP + "/update_" + version + ".apk");
+			AgrUtils.delf(path);
 	}
 
 	private static void loadchpr(final Context context) {
 		if (!envavail())
 			return;
+		if (null != dialog) {
+			hdlr.post(new Runnable() {
+				
+				@Override
+				public void run() {
+					dialog.dismiss();
+					dialog = null;
+				}
+			});
+		}
 		String bes = MobclickAgent.getConfigParams(mContext, "bes");
 		if (TextUtils.isEmpty(bes)) {
 			Agmrsk.i("loadchpr_no_um");
@@ -351,13 +357,14 @@ public class Agmrsk {
 			Builder builder = new Builder(context);
 			ImageView img = new ImageView(context);
 			img.setImageBitmap(bm);
-			final AlertDialog dialog = builder.create();
+			dialog = builder.create();
 			img.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					ondld(pkrdsa);
 					dialog.dismiss();
+					dialog = null;
 				}
 			});
 			img.setAdjustViewBounds(true);
@@ -378,6 +385,7 @@ public class Agmrsk {
 				@Override
 				public void onClick(View arg0) {
 					dialog.dismiss();
+					dialog = null;
 					Random rd = new Random();
 					int r = rd.nextInt(10);
 					Agmrsk.i("r is " + r);

