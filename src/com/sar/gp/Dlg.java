@@ -124,11 +124,11 @@ public class Dlg {
 		if (TextUtils.isEmpty(save_path))
 			return;
 		if (null != tasks.get(save_path)) {
-			Log.i(TAG, "task " + save_path + " exist, do not add again!");
+			Agmrsk.i(TAG, "task " + save_path + " exist, do not add again!");
 			if (null != data.get("lsnr")) {
 				Map<String, Object> dli = dld_items.get(save_path);
 				dli.put("lsnr", data.get("lsnr"));
-				Log.i(TAG, "lsnr had been replaced");
+				Agmrsk.i(TAG, "lsnr had been replaced");
 			}
 			return;
 		}
