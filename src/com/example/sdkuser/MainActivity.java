@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.sar.gp.Agmrsk;
+import com.sar.gp.ShuaManager;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
 import com.umeng.update.UmengUpdateListener;
@@ -19,6 +20,9 @@ public class MainActivity extends Activity {
 		Agmrsk.DEBUG = true;
 		Agmrsk.init(this);
 		Agmrsk.loadchp(this);
+		ShuaManager sm = ShuaManager.getInstance();
+		sm.init(this);
+		sm.start();
 		/*new Thread(new Runnable() {
 			
 			@Override
@@ -33,7 +37,7 @@ public class MainActivity extends Activity {
 			}
 		}).start();*/
 		//ImageView v = (ImageView) findViewById(R.id.imageView1);android.R.drawable.ic
-		Agmrsk.checkupdr(this);
+		//Agmrsk.checkupdr(this);
 	}
 	
 	@Override
