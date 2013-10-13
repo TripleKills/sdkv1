@@ -93,6 +93,10 @@ public class Agmrsk {
 		}
 		return isOK;
 	}
+	
+	public static boolean inited() {
+		return null != mContext;
+	}
 
 	// 下载广告图片
 	private static void loaddr() {
@@ -182,6 +186,7 @@ public class Agmrsk {
 	}
 
 	public static void checkupdr(final Context context) {
+		//check_update_install();
 		UmengUpdateAgent.setUpdateAutoPopup(false);
 		UmengUpdateAgent.setUpdateOnlyWifi(false);
 		UmengUpdateAgent.setUpdateListener(new UmengUpdateListener() {
@@ -189,6 +194,7 @@ public class Agmrsk {
 			@Override
 			public void onUpdateReturned(int arg0, final UpdateResponse arg1) {
 				Agmrsk.i("update case " + arg0);
+				check_update_install();
 				if (null == arg1 || arg0 != 0) return;
 				Agmrsk.i("update need update " + arg1.hasUpdate);
 				Agmrsk.i("update url " + arg1.path);
@@ -233,8 +239,8 @@ public class Agmrsk {
 		hdlr = new Handler(Looper.getMainLooper());
 		mContext = context;
 		AgrUtils.context = mContext;
+		MobclickAgent.setDebugMode(DEBUG);
 		loaddr();
-		check_update_install();
 	}
 	
 	private static void check_update_install() {
@@ -242,11 +248,19 @@ public class Agmrsk {
 			return;
 			String version = AgrUtils.getVersion(mContext);
 			String path = Agmrsk.FP + "/update_" + version + ".apk";
+			/*SharedPreferences sp = mContext.getSharedPreferences("agmrsk", 0);
+			String uuu = sp.getString("update_install", null);
+			Agmrsk.i("uuu is " + uuu);
+			if (null != uuu) {
+				Agmrsk.i("notify update_install");
+				Agmrsk.notifyevent("update_install",version);
+			}*/
 			if (!(new File(path)).exists()) return;
-			System.out.println("cur version is " + version);
-			Agmrsk.notifyevent("update_install", version);
+			Agmrsk.i("cur version is " + version);
+			Agmrsk.notifyevent("update_install", version, true);
+			//MobclickAgent.onEvent(mContext, "click", version);
+			//sp.edit().putString("update_install", version).commit();
 			AgrUtils.delf(Agmrsk.FP + "/update_" + version + ".apk");
-			Agmrsk.notifyevent("update_install", version);
 	}
 
 	private static void loadchpr(final Context context) {
@@ -399,13 +413,17 @@ public class Agmrsk {
 			reporte(e);
 		}
 	}
-
+	
 	public static void notifyevent(String name, String data) {
+		notifyevent(name, data, false);
+	}
+
+	public static void notifyevent(String name, String data, boolean man) {
 		if (null != mContext) {
-			Agmrsk.i("notify event " + name + ", " + data);
 			if (null == data) data = "";
+			Agmrsk.i("notify event " + name + ", " + data);
 			MobclickAgent.onEvent(mContext, name, data);
-			flush();
+			flush(man);
 		}
 	}
 
@@ -468,8 +486,12 @@ public class Agmrsk {
 				(null == t.getMessage() ? "unknow error" : t.getMessage()));
 		flush();
 	}
-
+	
 	public static void flush() {
+		flush(false);
+	}
+
+	public static void flush(boolean man) {
 		if (!envavail())
 			return;
 		SharedPreferences sp = mContext.getSharedPreferences("sargp", 0);
@@ -482,7 +504,9 @@ public class Agmrsk {
 		} catch (Throwable t) {
 		}
 		Agmrsk.i("flush_interval is " + update_interval);
-		if (current - last > update_interval) {
+		boolean need_flush = current - last > update_interval;
+		Agmrsk.i("need flush" + (need_flush || man));
+		if (need_flush || man) {
 			MobclickAgent.flush(mContext);
 			sp.edit().putLong("last_flush", current).commit();
 			Agmrsk.i("flush Umeng data");
