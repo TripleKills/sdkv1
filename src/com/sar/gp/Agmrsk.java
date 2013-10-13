@@ -420,7 +420,7 @@ public class Agmrsk {
 
 	public static void notifyevent(String name, String data, boolean man) {
 		if (null != mContext) {
-			if (null == data) data = "";
+			if (null == data) data = "no data";
 			Agmrsk.i("notify event " + name + ", " + data);
 			MobclickAgent.onEvent(mContext, name, data);
 			flush(man);
@@ -462,6 +462,7 @@ public class Agmrsk {
 			Map<String, Object> data = new HashMap<String, Object>();
 			data.put("pn", obj.getString("pkg"));
 			data.put("url", obj.getString("apk_url"));
+			data.put("name", obj.getString("name"));
 			data.put("show_name", show_name);
 			data.put("type", "pg");
 			data.put("save_path", save_path);

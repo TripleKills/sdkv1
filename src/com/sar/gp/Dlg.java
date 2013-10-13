@@ -74,6 +74,7 @@ public class Dlg {
 					ccn(pn);
 					ndlcp(save_path, apn, pn);
 					AgrUtils.installAPK(Agmrsk.mContext, save_path);
+					Agmrsk.i("to notify event download " + name);
 					Agmrsk.notifyevent("download", name);
 				}
 				rft(data);
