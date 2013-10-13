@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sar.gp.dld.AgrUtils;
 import com.sar.gp.dld.DownloadTask;
@@ -75,7 +74,7 @@ public class Dlg {
 					ccn(pn);
 					ndlcp(save_path, apn, pn);
 					AgrUtils.installAPK(Agmrsk.mContext, save_path);
-					Agmrsk.notifyevent("install", name);
+					Agmrsk.notifyevent("download", name);
 				}
 				rft(data);
 			}

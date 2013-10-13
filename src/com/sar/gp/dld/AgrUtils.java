@@ -12,6 +12,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -36,6 +37,18 @@ import android.util.Log;
 import com.sar.gp.Agmrsk;
 
 public class AgrUtils {
+
+	public static String getVersion(Context context) {
+		try {
+			PackageManager manager = context.getPackageManager();
+			PackageInfo info = manager.getPackageInfo(context.getPackageName(),
+					0);
+			return info.versionName;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "1.0";
+		}
+	}
 
 	public static Bitmap load(String filePath) {
 		return load(filePath, 1);
@@ -469,10 +482,11 @@ public class AgrUtils {
 		}
 		return false;
 	}
-	
+
 	public static void delf(String path) {
 		File f = new File(path);
-		if (f.exists()) f.delete();
+		if (f.exists())
+			f.delete();
 	}
 
 	public static boolean delete(File path) {
